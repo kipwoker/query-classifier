@@ -1,0 +1,24 @@
+{
+  "name": "query-classifier",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "test": "bun test",
+    "generate:schema": "bun run packages/domain/scripts/generate-schema.ts",
+    "test:integration": "bun test ./packages/domain/src/pipeline.integration.ts",
+    "benchmark": "bun run packages/benchmark/src/cli.ts",
+    "experiment:laya-kind": "bun run packages/domain/src/kind/laya-kind-experiment.ts",
+    "experiment:laya-completeness": "bun run packages/domain/src/kind/laya-completeness-experiment.ts",
+    "verify": "bun run test && bun run benchmark",
+    "dev:api": "bun run --watch apps/api/src/server.ts",
+    "dev:client": "bun run --watch apps/client/src/server.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5"
+  }
+}

@@ -1,0 +1,18 @@
+[
+  { "query": "Show me my orders", "schema": { "entity": "order", "filters": [{ "field": "placed_by_me", "kind": "mine", "terms": [], "type": "self" }], "combinators": [], "pagination": { "limit": 10 } } },
+  { "query": "Find products under $50", "schema": { "entity": "product", "filters": [{ "field": "price", "kind": "lt", "terms": ["50"], "type": "number" }], "combinators": [], "pagination": { "limit": 10 } } },
+  { "query": "Show products that cost more than 20 but less than 100", "schema": { "entity": "product", "filters": [{ "field": "price", "kind": "gt", "terms": ["20"], "type": "number" }, { "field": "price", "kind": "lt", "terms": ["100"], "type": "number" }], "combinators": ["and"], "pagination": { "limit": 10 } } },
+  { "query": "Find products starting with USB", "schema": { "entity": "product", "filters": [{ "field": "name", "kind": "prefix", "terms": ["USB"], "type": "string" }], "combinators": [], "pagination": { "limit": 10 } } },
+  { "query": "Show in-stock products", "schema": { "entity": "product", "filters": [{ "field": "in_stock", "kind": "eq", "terms": ["true"], "type": "boolean" }], "combinators": [], "pagination": { "limit": 10 } } },
+  { "query": "Show out of stock products", "schema": { "entity": "product", "filters": [{ "field": "in_stock", "kind": "ne", "terms": ["true"], "type": "boolean" }], "combinators": [], "pagination": { "limit": 10 } } },
+  { "query": "Find customers with email ending in gmail.com", "schema": { "entity": "customer", "filters": [{ "field": "email", "kind": "suffix", "terms": ["gmail.com"], "type": "email" }], "combinators": [], "pagination": { "limit": 10 } } },
+  { "query": "Find customer named Alice Smith", "schema": { "entity": "customer", "filters": [{ "field": "name", "kind": "eq", "terms": ["Alice Smith"], "type": "string" }], "combinators": [], "pagination": { "limit": 10 } } },
+  { "query": "Show categories with more than 10 products", "schema": { "entity": "category", "filters": [{ "field": "product_count", "kind": "gt", "terms": ["10"], "type": "number" }], "combinators": [], "pagination": { "limit": 10 } } },
+  { "query": "List all categories", "schema": { "entity": "category", "filters": [{ "field": "name", "kind": "all", "terms": [], "type": "string" }], "combinators": [], "pagination": { "limit": 10 } } },
+  { "query": "Show reviews with rating more than 4", "schema": { "entity": "review", "filters": [{ "field": "rating", "kind": "gt", "terms": ["4"], "type": "number" }], "combinators": [], "pagination": { "limit": 10 } } },
+  { "query": "Find verified purchase reviews", "schema": { "entity": "review", "filters": [{ "field": "verified_purchase", "kind": "eq", "terms": ["true"], "type": "boolean" }], "combinators": [], "pagination": { "limit": 10 } } },
+  { "query": "Show my reviews", "schema": { "entity": "review", "filters": [{ "field": "written_by_me", "kind": "mine", "terms": [], "type": "self" }], "combinators": [], "pagination": { "limit": 10 } } },
+  { "query": "Find orders placed before 2026-01-01", "schema": { "entity": "order", "filters": [{ "field": "placed_at", "kind": "lt", "terms": ["2026-01-01"], "type": "date" }], "combinators": [], "pagination": { "limit": 10 } } },
+  { "query": "Show pending orders", "schema": { "entity": "order", "filters": [{ "field": "status", "kind": "eq", "terms": ["pending"], "type": "string" }], "combinators": [], "pagination": { "limit": 10 } } },
+  { "query": "Find products added after 2026-01-01", "schema": { "entity": "product", "filters": [{ "field": "added_at", "kind": "gt", "terms": ["2026-01-01"], "type": "date" }], "combinators": [], "pagination": { "limit": 10 } } }
+]

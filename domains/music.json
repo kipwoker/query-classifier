@@ -1,0 +1,49 @@
+{
+  "domain": "music",
+  "entityListLabel": "tracks, playlists, artists, genres, or listeners on a music streaming service",
+  "outOfScopeDescription": "anything unrelated to searching/filtering tracks, playlists, artists, genres, or listeners on a music streaming service - e.g. general knowledge, cooking, weather, small talk",
+  "entities": {
+    "track": {
+      "description": "Songs available to stream",
+      "fields": {
+        "title": { "type": "string", "description": "the track's title" },
+        "duration_seconds": { "type": "number", "description": "the track's length in seconds" },
+        "release_date": { "type": "date", "description": "when the track was released" },
+        "explicit": { "type": "boolean", "description": "whether the track has explicit content" }
+      }
+    },
+    "playlist": {
+      "description": "User-curated collections of tracks",
+      "fields": {
+        "name": { "type": "string", "description": "the playlist's name" },
+        "created_by_me": { "type": "self", "description": "the caller's own playlists - 'my playlists', 'playlists I made', no other person involved" },
+        "track_count": { "type": "number", "description": "how many tracks the playlist has" },
+        "created_at": { "type": "date", "description": "when the playlist was created" }
+      }
+    },
+    "artist": {
+      "description": "Musicians and bands with tracks on the service",
+      "fields": {
+        "name": { "type": "string", "description": "the artist's name" },
+        "verified": { "type": "boolean", "description": "whether the artist's profile is verified" },
+        "monthly_listeners": { "type": "number", "description": "how many monthly listeners the artist has" }
+      }
+    },
+    "genre": {
+      "description": "Musical genres tracks are categorized under",
+      "fields": {
+        "name": { "type": "string", "description": "the genre's name" },
+        "track_count": { "type": "number", "description": "how many tracks belong to the genre" }
+      }
+    },
+    "listener": {
+      "description": "Registered listeners / accounts on the service",
+      "fields": {
+        "name": { "type": "string", "description": "the listener's name" },
+        "email": { "type": "email", "description": "the listener's email address" },
+        "premium": { "type": "boolean", "description": "whether the listener has a premium subscription" },
+        "signed_up_at": { "type": "date", "description": "when the listener signed up" }
+      }
+    }
+  }
+}

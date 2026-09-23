@@ -1,0 +1,7 @@
+{
+  "name": "@query-classifier/llm-client",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts"
+}

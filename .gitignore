@@ -1,0 +1,47 @@
+# dependencies (bun install)
+node_modules
+
+# agents
+.freebuff
+.claude
+
+# output
+out
+dist
+*.tgz
+
+# code coverage
+coverage
+*.lcov
+
+# logs
+logs
+_.log
+report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
+
+# dotenv environment variable files
+.env
+.env.development.local
+
+# runtime settings saved by the API's settings panel - local machine
+# state, not project config
+apps/api/.runtime-settings.json
+.env.test.local
+.env.production.local
+.env.local
+
+# caches
+.eslintcache
+.cache
+*.tsbuildinfo
+
+# IntelliJ based IDEs
+.idea
+
+# benchmark run artifacts - report-template/ is committed, generated
+# reports under benchmarks/reports/ are not (per solution-evolution.md)
+benchmarks/reports/*
+!benchmarks/reports/.gitkeep
+
+# Finder (MacOS) folder config
+.DS_Store

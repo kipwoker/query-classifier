@@ -1,0 +1,50 @@
+{
+  "domain": "shop",
+  "entityListLabel": "products, customers, orders, categories, or reviews in an online shop",
+  "outOfScopeDescription": "anything unrelated to searching/filtering products, customers, orders, categories, or reviews in an online shop - e.g. general knowledge, cooking, weather, small talk",
+  "entities": {
+    "product": {
+      "description": "Products for sale in the shop",
+      "fields": {
+        "name": { "type": "string", "description": "the product's name" },
+        "sku": { "type": "string", "description": "the product's SKU / stock code" },
+        "price": { "type": "number", "description": "the product's price" },
+        "in_stock": { "type": "boolean", "description": "whether the product is currently in stock" },
+        "added_at": { "type": "date", "description": "when the product was added to the catalog" }
+      }
+    },
+    "customer": {
+      "description": "Registered customers of the shop",
+      "fields": {
+        "name": { "type": "string", "description": "the customer's name" },
+        "email": { "type": "email", "description": "the customer's email address" },
+        "signed_up_at": { "type": "date", "description": "when the customer signed up" }
+      }
+    },
+    "order": {
+      "description": "Orders placed by customers",
+      "fields": {
+        "placed_by_me": { "type": "self", "description": "the caller's own orders - 'my orders', 'orders I placed', no other person involved" },
+        "status": { "type": "string", "description": "the order's status, e.g. pending, shipped, delivered, cancelled" },
+        "total": { "type": "number", "description": "the order's total price" },
+        "placed_at": { "type": "date", "description": "when the order was placed" }
+      }
+    },
+    "category": {
+      "description": "Product categories in the shop's catalog",
+      "fields": {
+        "name": { "type": "string", "description": "the category's name" },
+        "product_count": { "type": "number", "description": "how many products belong to the category" }
+      }
+    },
+    "review": {
+      "description": "Customer reviews left on products",
+      "fields": {
+        "written_by_me": { "type": "self", "description": "the caller's own reviews - 'my reviews', 'reviews I wrote', no other person involved" },
+        "rating": { "type": "number", "description": "the review's star rating" },
+        "verified_purchase": { "type": "boolean", "description": "whether the review is from a verified purchase" },
+        "created_at": { "type": "date", "description": "when the review was written" }
+      }
+    }
+  }
+}

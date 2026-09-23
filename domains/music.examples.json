@@ -1,0 +1,18 @@
+[
+  { "query": "Show my playlists", "schema": { "entity": "playlist", "filters": [{ "field": "created_by_me", "kind": "mine", "terms": [], "type": "self" }], "combinators": [], "pagination": { "limit": 10 } } },
+  { "query": "Find tracks longer than 300 seconds", "schema": { "entity": "track", "filters": [{ "field": "duration_seconds", "kind": "gt", "terms": ["300"], "type": "number" }], "combinators": [], "pagination": { "limit": 10 } } },
+  { "query": "Find tracks between 180 and 240 seconds", "schema": { "entity": "track", "filters": [{ "field": "duration_seconds", "kind": "gt", "terms": ["180"], "type": "number" }, { "field": "duration_seconds", "kind": "lt", "terms": ["240"], "type": "number" }], "combinators": ["and"], "pagination": { "limit": 10 } } },
+  { "query": "Show explicit tracks", "schema": { "entity": "track", "filters": [{ "field": "explicit", "kind": "eq", "terms": ["true"], "type": "boolean" }], "combinators": [], "pagination": { "limit": 10 } } },
+  { "query": "Show clean tracks", "schema": { "entity": "track", "filters": [{ "field": "explicit", "kind": "ne", "terms": ["true"], "type": "boolean" }], "combinators": [], "pagination": { "limit": 10 } } },
+  { "query": "Find tracks called Midnight City", "schema": { "entity": "track", "filters": [{ "field": "title", "kind": "eq", "terms": ["Midnight City"], "type": "string" }], "combinators": [], "pagination": { "limit": 10 } } },
+  { "query": "Show verified artists", "schema": { "entity": "artist", "filters": [{ "field": "verified", "kind": "eq", "terms": ["true"], "type": "boolean" }], "combinators": [], "pagination": { "limit": 10 } } },
+  { "query": "Find artists with more than 1000000 monthly listeners", "schema": { "entity": "artist", "filters": [{ "field": "monthly_listeners", "kind": "gt", "terms": ["1000000"], "type": "number" }], "combinators": [], "pagination": { "limit": 10 } } },
+  { "query": "Find artists starting with The", "schema": { "entity": "artist", "filters": [{ "field": "name", "kind": "prefix", "terms": ["The"], "type": "string" }], "combinators": [], "pagination": { "limit": 10 } } },
+  { "query": "Show genres with more than 50 tracks", "schema": { "entity": "genre", "filters": [{ "field": "track_count", "kind": "gt", "terms": ["50"], "type": "number" }], "combinators": [], "pagination": { "limit": 10 } } },
+  { "query": "List all genres", "schema": { "entity": "genre", "filters": [{ "field": "name", "kind": "all", "terms": [], "type": "string" }], "combinators": [], "pagination": { "limit": 10 } } },
+  { "query": "Find listeners with email ending in gmail.com", "schema": { "entity": "listener", "filters": [{ "field": "email", "kind": "suffix", "terms": ["gmail.com"], "type": "email" }], "combinators": [], "pagination": { "limit": 10 } } },
+  { "query": "Show premium listeners", "schema": { "entity": "listener", "filters": [{ "field": "premium", "kind": "eq", "terms": ["true"], "type": "boolean" }], "combinators": [], "pagination": { "limit": 10 } } },
+  { "query": "Find tracks released after 2026-01-01", "schema": { "entity": "track", "filters": [{ "field": "release_date", "kind": "gt", "terms": ["2026-01-01"], "type": "date" }], "combinators": [], "pagination": { "limit": 10 } } },
+  { "query": "Show playlists created before 2026-01-01", "schema": { "entity": "playlist", "filters": [{ "field": "created_at", "kind": "lt", "terms": ["2026-01-01"], "type": "date" }], "combinators": [], "pagination": { "limit": 10 } } },
+  { "query": "Find playlists with more than 20 tracks", "schema": { "entity": "playlist", "filters": [{ "field": "track_count", "kind": "gt", "terms": ["20"], "type": "number" }], "combinators": [], "pagination": { "limit": 10 } } }
+]

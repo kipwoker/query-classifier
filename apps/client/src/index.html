@@ -1,0 +1,763 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>query-classifier</title>
+    <style>
+      :root {
+        --bg: #0b0e17;
+        --bg-glow-1: #6d5bff;
+        --bg-glow-2: #22d3ee;
+        --panel: rgba(255, 255, 255, 0.04);
+        --panel-border: rgba(255, 255, 255, 0.09);
+        --text: #e8eaf5;
+        --text-dim: #9aa1bb;
+        --accent-1: #8b7bff;
+        --accent-2: #22d3ee;
+        --accent-gradient: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+        --danger: #ff6b6b;
+        --radius: 14px;
+      }
+
+      * {
+        box-sizing: border-box;
+        /* Unified thin dark scrollbars everywhere (Firefox). The WebKit block
+           below styles the same bars for Chromium/Safari/Electron. */
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
+      }
+
+      ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.16);
+        border-radius: 999px;
+        border: 2px solid transparent;
+        background-clip: padding-box;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background-color: rgba(255, 255, 255, 0.28);
+      }
+
+      ::-webkit-scrollbar-corner {
+        background: transparent;
+      }
+
+      body {
+        font-family: "Inter", system-ui, -apple-system, sans-serif;
+        margin: 0;
+        min-height: 100vh;
+        overflow-x: hidden;
+        color: var(--text);
+        background: var(--bg);
+        background-image:
+          radial-gradient(600px circle at 10% -10%, color-mix(in srgb, var(--bg-glow-1) 25%, transparent), transparent 60%),
+          radial-gradient(700px circle at 100% 0%, color-mix(in srgb, var(--bg-glow-2) 20%, transparent), transparent 60%);
+        background-attachment: fixed;
+      }
+
+      .app {
+        margin: 0 auto;
+        padding: 2.5rem 2rem 4rem;
+      }
+
+      .app-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        animation: dropIn 0.5s ease-out;
+      }
+
+      .app-header h1 {
+        font-size: 2.4rem;
+        margin: 0;
+        letter-spacing: -0.02em;
+      }
+
+      .app-title-glow {
+        background: var(--accent-gradient);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        filter: drop-shadow(0 0 18px color-mix(in srgb, var(--accent-1) 45%, transparent));
+      }
+
+      .app-subtitle {
+        color: var(--text-dim);
+        margin: 0.4rem 0 0;
+        font-size: 0.95rem;
+      }
+
+      .panel {
+        min-width: 0;
+        /* Positioned so the :has() rule below can raise it while a dropdown
+           inside is open. */
+        position: relative;
+        background: var(--panel);
+        border: 1px solid var(--panel-border);
+        border-radius: var(--radius);
+        backdrop-filter: blur(10px);
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 1.25rem;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+        animation: dropIn 0.4s ease-out;
+      }
+
+      /* The dropdown menu (z-index 60) can only compete with *sibling* panels
+         at the panel level - each panel is its own stacking context (its own
+         backdrop-filter), so raise the whole query panel while a menu is open
+         inside it. The settings dropdown sits in the fixed-position header,
+         above everything, and needs no help. */
+      .panel:has(.select.open) {
+        z-index: 70;
+      }
+
+      .domain-panel {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+
+      .panel-label {
+        color: var(--text-dim);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .domain-pills {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .domain-pill {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--panel-border);
+        color: var(--text-dim);
+        padding: 0.4rem 1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+      }
+
+      .domain-pill:hover {
+        border-color: var(--accent-1);
+        color: var(--text);
+        transform: translateY(-1px);
+      }
+
+      .domain-pill.active {
+        background: var(--accent-gradient);
+        border-color: transparent;
+        color: #0b0e17;
+        font-weight: 600;
+        box-shadow: 0 0 18px color-mix(in srgb, var(--accent-1) 55%, transparent);
+      }
+
+      textarea,
+      select,
+      button {
+        font-family: inherit;
+        font-size: 1rem;
+      }
+
+      textarea {
+        width: 100%;
+        padding: 0.75rem 0.9rem;
+        background: rgba(0, 0, 0, 0.25);
+        color: var(--text);
+        border: 1px solid var(--panel-border);
+        border-radius: 10px;
+        resize: vertical;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      textarea:focus {
+        outline: none;
+        border-color: var(--accent-1);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-1) 25%, transparent);
+      }
+
+      textarea::placeholder {
+        color: var(--text-dim);
+      }
+
+      select {
+        background: rgba(0, 0, 0, 0.25);
+        color: var(--text);
+        border: 1px solid var(--panel-border);
+        border-radius: 8px;
+        padding: 0.45rem 0.6rem;
+      }
+
+      /* ---- custom select (the native dropdown popup is OS-drawn and always
+         white, so Select.tsx renders trigger + menu itself) ---- */
+
+      .select {
+        position: relative;
+        display: inline-flex;
+        min-width: 0;
+      }
+
+      .select-trigger {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        width: 100%;
+        min-width: 0;
+        background: rgba(0, 0, 0, 0.25);
+        color: var(--text);
+        border: 1px solid var(--panel-border);
+        border-radius: 8px;
+        padding: 0.45rem 0.6rem;
+        text-align: left;
+      }
+
+      .select.open .select-trigger {
+        border-color: var(--accent-1);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-1) 25%, transparent);
+      }
+
+      .select-label {
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .select-label.placeholder {
+        color: var(--text-dim);
+      }
+
+      .select-chevron {
+        flex-shrink: 0;
+        width: 11px;
+        height: 11px;
+        color: var(--text-dim);
+        transition: transform 0.2s ease;
+      }
+
+      .select.open .select-chevron {
+        transform: rotate(180deg);
+        color: var(--accent-1);
+      }
+
+      .select-menu {
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        z-index: 60;
+        min-width: 100%;
+        width: max-content;
+        max-width: min(420px, calc(100vw - 2rem));
+        max-height: 260px;
+        overflow-y: auto;
+        padding: 0.3rem;
+        background: rgba(14, 17, 28, 0.97);
+        border: 1px solid var(--panel-border);
+        border-radius: 10px;
+        backdrop-filter: blur(14px);
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+        animation: fadeIn 0.15s ease-out;
+      }
+
+      .select-menu.align-right {
+        left: auto;
+        right: 0;
+      }
+
+      .select-option {
+        display: block;
+        width: 100%;
+        background: none;
+        border: none;
+        border-radius: 7px;
+        padding: 0.4rem 0.55rem;
+        color: var(--text-dim);
+        text-align: left;
+        font-size: 0.9rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        transition: background 0.12s ease, color 0.12s ease;
+      }
+
+      .select-option:hover {
+        transform: none;
+        box-shadow: none;
+      }
+
+      .select-option.highlighted {
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text);
+      }
+
+      .select-option.selected {
+        background: color-mix(in srgb, var(--accent-1) 14%, transparent);
+        color: var(--text);
+      }
+
+      .select-empty {
+        padding: 0.5rem 0.55rem;
+        color: var(--text-dim);
+        font-size: 0.85rem;
+      }
+
+      button {
+        cursor: pointer;
+        border-radius: 10px;
+        border: 1px solid var(--panel-border);
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text);
+        padding: 0.5rem 1rem;
+        transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+      }
+
+      button:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+      }
+
+      button:disabled {
+        opacity: 0.6;
+        cursor: default;
+      }
+
+      .submit-row {
+        display: flex;
+        gap: 0.6rem;
+        margin-top: 0.6rem;
+        align-items: center;
+      }
+
+      .submit-button {
+        background: var(--accent-gradient);
+        border: none;
+        color: #0b0e17;
+        font-weight: 600;
+        padding: 0.55rem 1.4rem;
+      }
+
+      .submit-button:hover:not(:disabled) {
+        box-shadow: 0 0 20px color-mix(in srgb, var(--accent-1) 55%, transparent);
+      }
+
+      pre {
+        background: rgba(0, 0, 0, 0.35);
+        border: 1px solid var(--panel-border);
+        padding: 1rem;
+        overflow-x: auto;
+        border-radius: 10px;
+        color: var(--text);
+      }
+
+      code {
+        color: var(--accent-2);
+      }
+
+      .tag {
+        display: inline-block;
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 0.12rem 0.45rem;
+        border-radius: 999px;
+        margin-right: 0.35rem;
+        vertical-align: middle;
+      }
+
+      .tag-laya {
+        background: color-mix(in srgb, var(--accent-1) 25%, transparent);
+        color: #d3c9ff;
+        border: 1px solid color-mix(in srgb, var(--accent-1) 50%, transparent);
+      }
+
+      .tag-llm {
+        background: color-mix(in srgb, var(--accent-2) 22%, transparent);
+        color: #b6f3ff;
+        border: 1px solid color-mix(in srgb, var(--accent-2) 50%, transparent);
+      }
+
+      /* ---- progress bar ---- */
+
+      .progress {
+        margin-top: 1rem;
+        animation: dropIn 0.3s ease-out;
+      }
+
+      .progress-track {
+        height: 8px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        height: 100%;
+        border-radius: 999px;
+        background: var(--accent-gradient);
+        background-size: 200% 100%;
+        transition: width 0.35s ease;
+        animation: shimmer 1.6s linear infinite;
+      }
+
+      .progress-label {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        margin-top: 0.5rem;
+        font-size: 0.85rem;
+        color: var(--text-dim);
+      }
+
+      .progress-percent {
+        margin-left: auto;
+        font-weight: 600;
+        color: var(--text);
+      }
+
+      .error-banner {
+        color: var(--danger);
+        background: rgba(255, 107, 107, 0.08);
+        border: 1px solid rgba(255, 107, 107, 0.3);
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+      }
+
+      .results {
+        display: grid;
+        gap: 1.25rem;
+      }
+
+      /* ---- trace waterfall ---- */
+
+      .trace-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+
+      .trace-layout {
+        display: flex;
+        gap: 0;
+        align-items: flex-start;
+        min-width: 0;
+      }
+
+      .trace-list {
+        flex: 1 1 auto;
+        min-width: 0;
+        max-height: 480px;
+        overflow-y: auto;
+        padding-right: 0.75rem;
+      }
+
+      .trace-resizer {
+        flex: 0 0 auto;
+        width: 10px;
+        margin: 0 0.25rem;
+        cursor: col-resize;
+        align-self: stretch;
+        display: flex;
+        justify-content: center;
+      }
+
+      .trace-resizer::before {
+        content: "";
+        width: 2px;
+        border-radius: 2px;
+        background: var(--panel-border);
+        transition: background 0.15s ease;
+      }
+
+      .trace-resizer:hover::before,
+      .trace-resizer.dragging::before {
+        background: var(--accent-1);
+      }
+
+      .trace-detail-pane {
+        flex: 0 0 auto;
+        position: sticky;
+        top: 0;
+        max-height: 1000px;
+        overflow-y: auto;
+      }
+
+      .trace-detail-empty {
+        color: var(--text-dim);
+        font-size: 0.85rem;
+        border: 1px dashed var(--panel-border);
+        border-radius: 10px;
+        padding: 1.5rem 1rem;
+        text-align: center;
+      }
+
+      .span-row {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 2px 0;
+        font-size: 0.85rem;
+        width: 100%;
+        min-width: 0;
+        background: none;
+        border: 1px solid transparent;
+        border-radius: 6px;
+        padding: 4px 6px;
+        cursor: pointer;
+        text-align: left;
+        font-family: inherit;
+        color: var(--text);
+        transition: background 0.15s ease, border-color 0.15s ease;
+      }
+
+      .span-row:hover {
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      .span-row.selected {
+        border-color: var(--accent-1);
+        background: color-mix(in srgb, var(--accent-1) 12%, transparent);
+      }
+
+      .span-bar {
+        height: 14px;
+        background: var(--accent-gradient);
+        border-radius: 3px;
+      }
+
+      .span-name {
+        width: 220px;
+        flex-shrink: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .span-attrs {
+        flex: 1 1 auto;
+        min-width: 0;
+        color: var(--text-dim);
+        font-size: 0.8rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .span-detail {
+        padding: 1rem;
+        border: 1px solid var(--panel-border);
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.25);
+      }
+
+      .span-detail h4 {
+        margin-top: 0;
+      }
+
+      .span-detail-meta {
+        font-size: 0.85rem;
+        margin-bottom: 0.75rem;
+      }
+
+      .span-detail-meta td {
+        padding: 1px 0.5rem 1px 0;
+        color: var(--text-dim);
+      }
+
+      .span-detail-meta td:first-child {
+        color: #6f7690;
+      }
+
+      .span-detail-attr {
+        margin-bottom: 0.5rem;
+      }
+
+      .span-detail-attr-key {
+        font-weight: 600;
+        font-size: 0.8rem;
+        color: var(--accent-2);
+      }
+
+      .span-detail-attr pre {
+        margin: 2px 0 0;
+        font-size: 0.8rem;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .fade-in {
+        animation: fadeIn 0.35s ease-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes dropIn {
+        from {
+          opacity: 0;
+          transform: translateY(-8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes shimmer {
+        from {
+          background-position: 200% 0;
+        }
+        to {
+          background-position: -200% 0;
+        }
+      }
+
+      /* ---- settings trigger (top-right cog + status light) ---- */
+
+      .settings-trigger {
+        position: absolute;
+        top: 1.25rem;
+        right: 1.5rem;
+        z-index: 50;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+      }
+
+      .status-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        transition: background 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .status-ready {
+        background: #4ade80;
+        box-shadow: 0 0 10px 2px rgba(74, 222, 128, 0.6);
+      }
+
+      .status-not-ready {
+        background: var(--danger);
+        box-shadow: 0 0 10px 2px rgba(255, 107, 107, 0.55);
+        animation: pulseDot 1.6s ease-in-out infinite;
+      }
+
+      @keyframes pulseDot {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.4;
+        }
+      }
+
+      .icon-button {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        font-size: 1.1rem;
+        line-height: 1;
+      }
+
+      .gear-button {
+        background: var(--panel);
+        backdrop-filter: blur(10px);
+      }
+
+      .settings-panel {
+        position: absolute;
+        top: calc(100% + 0.6rem);
+        right: 0;
+        width: 320px;
+        background: rgba(14, 17, 28, 0.92);
+        border: 1px solid var(--panel-border);
+        border-radius: var(--radius);
+        backdrop-filter: blur(14px);
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+        padding: 1rem 1.1rem;
+      }
+
+      .settings-panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
+      }
+
+      .settings-panel-header h3 {
+        margin: 0;
+        font-size: 1rem;
+      }
+
+      .settings-field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+        margin-bottom: 0.85rem;
+        font-size: 0.8rem;
+        color: var(--text-dim);
+      }
+
+      .settings-field input {
+        background: rgba(0, 0, 0, 0.25);
+        color: var(--text);
+        border: 1px solid var(--panel-border);
+        border-radius: 8px;
+        padding: 0.4rem 0.55rem;
+        font-size: 0.85rem;
+      }
+
+      .settings-field input:focus {
+        outline: none;
+        border-color: var(--accent-1);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-1) 25%, transparent);
+      }
+
+      .settings-model-row {
+        display: flex;
+        gap: 0.4rem;
+      }
+
+      .settings-model-row .select {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .settings-actions {
+        display: flex;
+        justify-content: flex-end;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./frontend.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "name": "@query-classifier/api",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@query-classifier/domain": "workspace:*",
+    "@query-classifier/telemetry": "workspace:*",
+    "@query-classifier/laya-client": "workspace:*",
+    "@query-classifier/llm-client": "workspace:*"
+  }
+}

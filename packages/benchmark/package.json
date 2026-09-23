@@ -1,0 +1,11 @@
+{
+  "name": "@query-classifier/benchmark",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "dependencies": {
+    "@query-classifier/domain": "workspace:*",
+    "@query-classifier/telemetry": "workspace:*"
+  }
+}
